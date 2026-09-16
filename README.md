@@ -6,12 +6,6 @@
 
 Sell-side reports → evidence-grounded FactorSpec → programmatic gate → two LoRA adapters (SFT then GRPO) → multi-turn evolution on a frozen spec.
 
-> 仓库里的 `data/gold/gold.jsonl` 只有 **5 条演示样本**。代码闭环已实现；门禁通过率、IR 增量等效果数字必须在补齐标注并完成训练后再填，本 README 不写占位成绩。
->
-> Shipped gold is **5 demo cases**. The code path is complete; do not treat demo scores as trained results.
-
----
-
 ## 中文
 
 ### 这是什么
