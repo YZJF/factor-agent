@@ -14,7 +14,7 @@ from factor_agent.score.verifier import score_prediction
 from factor_agent.spec.requirements import missing_requirements
 from factor_agent.split import group_key
 
-QUOTE = "过去二十(20)个交易日"
+QUOTE = "过去二十(20)个交易日"  # CJK fixture: Chinese numerals must ground windows=[20].
 ALLOWED = {"search_report", "validate_factor_spec"}
 
 
@@ -155,9 +155,9 @@ def test_headline_metrics_and_percentage_point_compare():
 
 
 def test_group_key_falls_back_to_institution_and_series():
-    document = DocumentMeta(doc_id="d1", institution="机构A", series="量价周报")
+    document = DocumentMeta(doc_id="d1", institution="BrokerA", series="PriceVolumeWeekly")
     case = FactorCase(case_id="c1", report="x", gold=_spec(), document=document)
-    assert group_key(case) == "机构A::量价周报"
+    assert group_key(case) == "BrokerA::PriceVolumeWeekly"
     case.group_id = "explicit"
     assert group_key(case) == "explicit"
 
@@ -166,7 +166,7 @@ def test_group_report_medians_do_not_follow_the_biggest_institution():
     good = score_prediction(_case(_spec()), _spec().model_dump_json())
     bad = score_prediction(_case(_spec()), "not json")
     results = [good, bad, bad, bad]
-    groups = {"demo": "机构A::量价周报"}
+    groups = {"demo": "BrokerA::PriceVolumeWeekly"}
     report = summarize_by_group(results, groups)
     assert report["group_count"] == 1
     assert report["pooled"]["n"] == 4.0

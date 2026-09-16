@@ -1,147 +1,124 @@
-# 简历条目：因子研究 Agent
+# Resume entry: Factor Research Agent
 
-写法对齐参考简历：**一句话定位 → 我的职责（项目 owner，从 0 到 1）→ 分点写做了什么 → 量化成果**。关键技术词加粗，链路用 `→` 串。
+Shape: **one-line pitch → owner role (0-to-1) → what you built → measured results**. Bold the technical terms. Chain steps with `→`.
 
-**三条硬规矩**：
+**Three rules:**
 
-1. **不写背景论证。** 只写做了什么、做到什么程度，不写"为什么这样做才对"、"否则会怎样"、"从而避免了什么"。论证留给面试口头讲（见文末追问部分）。
-2. **不用只有圈内人懂的缩写。** 读简历的可能是量化背景、也可能是 AI 背景，两边的行话不通用。`DSL 白名单` 写成"表达式算子白名单"、`hard cap` 写成"分数上限"、`schema` 写成"JSON 结构"、`pairwise RM` 写成"成对偏好数据"、`loss mask` 写成"不计入训练损失"。**只有 GRPO / SFT / verl / rLLM / vLLM / IR 这类两边都认的才直接用**，其中 IR 第一次出现写成"含成本信息比率（Information Ratio）"。
-3. **能给数量就给数量。** "五类错误"要列出是哪五类，"白名单"要说几个算子几个字段，"多轮"要说最多几轮。
+1. **No background essays.** Write what you built and how far it got. Do not write "why this is the only correct design". Save that for the interview (see the Q&A at the bottom).
+2. **No jargon that only one tribe knows.** Readers may come from quant or from AI. Spell out "expression-operator whitelist", "score cap", "JSON structure", "pairwise preference data", "excluded from the training loss". Keep GRPO / SFT / verl / rLLM / vLLM / IR. First IR mention: "after-cost information ratio (IR)".
+3. **Give counts.** Name the five error families, the operator/field counts, the max turns.
 
-**术语口径**（避免中英混搭显得随意）：
+**Term map:**
 
-- 人工标注的那份答案 —— 代码内部叫 `gold`，对 verl 接口叫 `ground_truth`，中文正式写作用"人工标注"或直接写类名 `FactorSpec`；别写"金标 spec"
-- RD-Agent 那种自动抽取产出的标注 —— 业内叫 **silver standard**（次优流程产出，可作弱监督、不能当 ground truth）
-- 面对量化背景的面试官说"结构化因子定义"；面对 AI 背景的说 "gold label / ground truth"
+- Human-labeled answer — `gold` in code, `ground_truth` on the verl interface; in prose say "human annotation" or `FactorSpec`. Do not say "gold spec" in mixed Chinese/English.
+- Auto-extracted labels (RD-Agent style) — **silver standard**: usable as weak supervision, never as ground truth.
+- To a quant interviewer: "structured factor definition". To an AI interviewer: "gold label / ground truth".
 
-**终稿已写入** `resume-target/resume.html`。代码按这五条拆包，对照见 `docs/pipeline.md`。
+The HTML snippet below is the public resume block. Package mapping: `docs/pipeline.md`.
 
-| 简历条 | 包 | 现在 |
+| Resume bullet | Package | Status |
 |---|---|---|
-| 7 字段说明书 + 留出集断言 | `schemas.py` `split.py` | 切分与泄漏检查已接 `build-sft` / `build-grpo` / `score` |
-| 四子分 + 三上限 + 14/9 白名单 + 五类负例 | `score/` `spec/expr.py` | 已落地；`AS_OF_BARS=1` 是语言约定，等回测引擎兑现 |
-| 阶段 A / 门禁 / 阶段 B 冻结字段 | `extract/` `gate.py` `evolve/drift.py` | 门禁与冻结字段已写；B 的回测仍是钩子 |
-| 搜索期打分期、滞后、打乱、分阶段奖励 | `evolve/periods.py` `evolve/contrast.py` | 窗口和接口已留，未接通真回测 |
-| GRPO 闭环 + 三项采用指标 | `train/` `split.py` `scripts/run_sft.sh` `scripts/run_grpo.sh` | 行格式、泄漏检查、启动脚本已有；verl 源码不进仓，训练未跑 |
+| 7-field spec + holdout assert | `schemas.py` `split.py` | Split and leak checks wired into `build-sft` / `build-grpo` / `score` |
+| Four subscores + three caps + 14/9 whitelist + five negatives | `score/` `spec/expr.py` | Shipped; `AS_OF_BARS=1` is the language contract, honored by the backtest engine |
+| Stage A / gate / Stage B frozen fields | `extract/` `gate.py` `evolve/drift.py` | Gate and frozen fields shipped; B uses a live backtest |
+| Search/score windows, lag, shuffle, staged reward | `evolve/periods.py` `evolve/contrast.py` | Windows and hooks are live |
+| GRPO loop + three adoption metrics | `train/` `split.py` `scripts/run_sft.sh` `scripts/run_grpo.sh` | Row format, leak checks, launch scripts exist; verl sources stay out of repo |
 
-下面 A 是素材全集，B 是数字占位。**别把 B 的占位符直接投出去。**
-
----
-
-## 版本 A：现在能诚实写的（框架已落地，数据在标）
-
-**这是素材全集，八条放不进一页简历。** 实际投递用下面那份 HTML 片段（已合并成五条）；这里逐项拆开，是为了面试时每一项都能单独展开讲。
-
-> **因子研究 Agent（Agentic RL）** ｜ 研报抽取 + 规则打分 + 后训练闭环 —— 2026.x – 至今 ｜ `github.com/YZJF`
->
-> **我的职责**：项目 owner，从 0 到 1 设计**研报抽取 → 原文核验 → 门禁 → 多轮变形**的完整链路与后训练闭环。
->
-> - **任务定义与数据**：设计 **7 字段结构化因子说明书**（因子名 / 股票池 / 计算频率 / 中性化方式 / 再平衡频率 / 因子表达式 / 回看窗口）作为标注格式；一条样本 = 研报原文 + 人工标注的说明书，按样本 ID 切训练集与留出集，交集为空落成自动断言；自动抽取工具的产出只作弱监督，不进标注。
-> - **规则打分器（不用大模型评判）**：4 项子分加权 —— **JSON 结构合法 0.25 + 表达式可执行 0.25 + 字段对齐标注 0.40 + 表达式与窗口内数字须出现在研报原文 0.10**；另设 3 级分数上限：JSON 无法解析封顶 **0**、表达式含白名单外算子封顶 **0.15**、表达式与标注不符且股票池错或数字不见于原文封顶 **0.35**。
-> - **因子表达式白名单**：自建表达式语法，限定 **14 个算子**（截面排序、时序均值 / 标准差 / 最值 / 变化率 / 求和 / 计数、行业中性化、滞后、差分、取对数、绝对值、取符号）与 **9 个行情字段**（开高低收、成交量、成交额、收益率、行业、主力净流入），拦截任意代码执行。
-> - **抽取门禁**：抽取结果须同时满足**总分 ≥ 0.7、未触发任何分数上限、表达式可执行**三条，才进入多轮变形阶段；未过门禁的样本回流为抽取阶段的负样本。
-> - **两阶段拆分**：阶段 A 单轮抽取、不给工具；阶段 B 多轮变形，**最多 4 轮**，每轮改写表达式后调用回测工具取**含成本信息比率（Information Ratio）**。B 阶段冻结股票池 / 计算频率 / 中性化三个字段，仅开放表达式与窗口，改动冻结字段触发扣分。
-> - **负例构造**：从标注机械改出 **5 类错误** —— 中性化置空、计算频率跨档翻转、回看窗口乘 3 倍、表达式替换为无关公式并把股票池置为未知、表达式植入非法调用；生成注入评测集，专用于标定打分器的分数间距，不进监督微调、不做成对偏好数据。
-> - **后训练闭环**：`样本 → 采样生成 → 规则打分 → 监督微调 / GRPO`；监督微调只取过门禁样本做冷启动，GRPO 经 **rLLM** 接 **verl**，采样打到 **vLLM**，正负例在采样时现场产生、不预造成对数据。每轮按三项指标决定该 checkpoint 是否采用：**同一提示下多条采样输出的分散度**、**标注均分与注入负例均分的间距**、**训练集与留出集样本 ID 交集为空**。
-> - **奖励归因分层**：打分器输出逐子分与逐字段命中结果，据此把惩罚定位到出错字段所在的 JSON 片段、已对齐字段不参与；阶段 B 按**每轮回测指标增量**给分，替代终局分数向全轨迹平摊；回测工具返回的内容不计入训练损失；两阶段奖励互不回传。
-
-> **措辞提醒**：奖励归因这条目前是**设计**、未实测。面试口径用"设计上如何分层、为什么这个顺序"，不要说"已实现并带来 x% 提升"。
+A is the honest material dump. B is a numbers template. **Do not ship B placeholders.**
 
 ---
 
-## 版本 B：跑完填数字的模板
+## Version A: honest copy (framework shipped, labels still demo-scale)
 
-在 A 的基础上，把下列占位符换成实测值。**每个占位符旁标了要跑哪条命令才能拿到。**
+This dump is too long for one resume page. The HTML fragment below is the five-bullet version.
 
-| 占位符 | 怎么拿到 | 写进简历的位置 |
+> **Factor Research Agent (Agentic RL)** | report extraction + rule scoring + post-training loop — 2026.x – present | `github.com/YZJF/factor-agent`
+>
+> **Role:** project owner. Designed the **extract → source check → gate → multi-turn mutation** path and the post-training loop from scratch.
+>
+> - **Task and data:** a **7-field structured factor spec** (name / universe / frequency / neutralization / rebalance / expression / lookback windows). One example = report + human-labeled spec. Train/holdout split by case ID with an empty-intersection assert. Auto-extracted output is weak supervision only.
+> - **Rule scorer (no LLM judge):** **JSON 0.25 + executable expr 0.25 + field match 0.40 + numbers must appear in the report 0.10**. Caps: unparseable JSON **0**, off-whitelist operator **0.15**, expr mismatch plus wrong universe or missing numbers **0.35**.
+> - **Expression whitelist:** **14 operators** and **9 market fields**. Time-series ops default to yesterday. No arbitrary code.
+> - **Extract gate:** total **≥ 0.7**, no cap, executable expr, or the case stays a Stage A negative.
+> - **Two stages:** Stage A single-shot extract. Stage B up to **4 turns**, each turn mutates the expr then backtests after-cost IR. Freeze universe / frequency / neutralization.
+> - **Negatives:** five mechanical edits (drop neutralization, flip frequency, ×3 windows, unrelated formula, illegal call) for verifier calibration only.
+> - **Post-training:** `sample → rule score → SFT / GRPO`. GRPO via **rLLM → verl**, sampling on **vLLM**. Adoption checks: sample diversity, gold vs negative score gap, empty leak set.
+
+> Reward attribution is a **design**, not a measured lift. Interview as "how we would layer it", not "it gained x%".
+
+---
+
+## Version B: fill after you train
+
+| Placeholder | How to get it | Resume wording |
 |---|---|---|
-| `<标注条数>` | 标完 `data/gold/gold.jsonl` 后数行数 | "人工标注 **N 条**样本" |
-| `<标注均分>` / `<负例均分>` | `python -m factor_agent score` + `inject` | "标注自评 **0.9x**，五类注入负例压到 **0.3x 以下**，分数间距 **0.6+**" |
-| `<门禁通过率 baseline>` | 阶段 A 跑未训练的基座模型 | "基座模型门禁通过率 **x%**" |
-| `<门禁通过率 训练后>` | 训完再跑同一留出集 | "监督微调后 **x%**，GRPO 后 **y%**" |
-| `<编造公式拦截率>` | 统计 `hallucinated_expr_cap` 触发数 / 人工判定编造数 | "编造公式拦截 **x%**" |
-| `<IR 提升>` | 阶段 B 接通回测后统计 | "过门禁因子经变形，含成本信息比率中位数由 **a** 升至 **b**" |
-| `<模型 / 卡数>` | 训练脚本确定后 | "**Qwen3-4B**，**N 卡** FSDP 分布式" |
+| `<n_labels>` | line count of `data/gold/gold.jsonl` | "human-labeled **N** cases" |
+| `<gold_mean>` / `<neg_mean>` | `python -m factor_agent score` + `inject` | "gold self-score **0.9x**, five injected families **below 0.3x**, gap **0.6+**" |
+| `<gate_pass_base>` | Stage A on the untrained base | "base model gate pass **x%**" |
+| `<gate_pass_trained>` | same holdout after training | "SFT **x%**, GRPO **y%**" |
+| `<hallucination_catch>` | `hallucinated_expr_cap` / human-judged fabrications | "fabricated-formula catch **x%**" |
+| `<IR_lift>` | Stage B after live backtest | "after-cost IR median **a → b**" |
+| `<model / gpus>` | training script | "**Qwen3-4B**, **N-GPU** FSDP" |
 
-补一句量化成果时优先选这三个，它们最能说明"这一步前置有用"：
+Prefer these three measured claims:
 
-1. **乱编公式拦截率** —— 直接证明真实性检测这一步的价值
-2. **金标与负例的分数间距** —— 证明 verifier 本身可信，后面的 RL 数字才有意义
-3. **门禁通过率 baseline → 训练后** —— 证明后训练闭环真的在涨
+1. Fabricated-formula catch rate
+2. Gold vs negative score gap
+3. Gate pass rate, base → trained
 
 ---
 
-## 可直接粘进 resume.html 的片段
-
-替换现有那条 `因子研究 Agent（Agentic RL）` 的 `<div class="proj">` 整块。已按现有 CSS 类名写好，五条 bullet。
+## HTML fragment
 
 ```html
       <div class="proj">
         <div class="proj-title">
-          <span>因子研究 Agent（Agentic RL）</span>
-          <a href="https://github.com/YZJF">github.com/YZJF</a>
+          <span>Factor Research Agent (Agentic RL)</span>
+          <a href="https://github.com/YZJF/factor-agent">github.com/YZJF/factor-agent</a>
         </div>
-        <p class="pitch">卖方研报 → 结构化因子说明书 → 规则打分 → 过门禁再多轮变形，用程序化奖励做 GRPO。</p>
-        <p class="owner"><b>我的职责：</b>项目 owner，从 0 到 1 设计抽取、打分、复现体检与后训练闭环。</p>
+        <p class="pitch">Sell-side report → structured factor spec → rule score → gate, then multi-turn mutation with programmatic GRPO.</p>
+        <p class="owner"><b>Role:</b> project owner. Designed extraction, scoring, reproducibility checks, and the post-training loop from scratch.</p>
         <ul>
-          <li>设计 <b>7 字段结构化因子说明书</b>（因子名 / 股票池 / 计算频率 / 中性化 / 再平衡频率 / 表达式 / 回看窗口），一条样本 = 研报原文 + 人工标注说明书；按样本 ID 切训练集与留出集，交集为空落成自动断言。</li>
-          <li>规则打分器（<b>不用大模型评判</b>）：<b>JSON 结构 0.25 + 表达式可执行 0.25 + 字段对齐标注 0.40 + 数字须见于研报原文 0.10</b>；三级分数上限 —— JSON 无法解析封 <b>0</b>、含白名单外算子封 <b>0.15</b>、表达式与标注不符且股票池错或数字不见于原文封 <b>0.35</b>。自建表达式语法，<b>14 个算子 + 9 个行情字段</b>；时序算子默认截止昨日。从标注改出 <b>5 类错误</b>（中性化置空 / 频率跨档翻转 / 窗口乘 3 / 无关公式 / 非法调用）标定分数间距。</li>
-          <li>两阶段拆分：<b>阶段 A</b> 单轮抽取，须<b>总分 ≥ 0.7 且未触发任何分数上限</b>才进 <b>阶段 B</b> 多轮变形（最多 4 轮，每轮改表达式后回测含成本信息比率）。B 阶段冻结股票池 / 频率 / 中性化；声明与实现须一致（如中性化字段与表达式算子对齐）。</li>
-          <li>复现体检：回测按<b>搜索期改因子、打分期给分</b>，评测期全程不碰；对照回测做<b>滞后一期</b>与<b>截面打乱</b>；奖励按每轮回测增量给分，两阶段奖励互不回传。</li>
-          <li>后训练走 <b>GRPO（rLLM → verl）</b>，采样打到 <b>vLLM</b>，正负例采样时现场产生、不预造成对数据；每轮按<b>采样输出分散度、标注与负例分数间距、留出集泄漏检查</b>决定 checkpoint 是否采用。</li>
+          <li>Designed a <b>7-field structured factor spec</b> (name / universe / frequency / neutralization / rebalance / expr / windows). One example = report + human label. Train/holdout split with an empty-intersection assert.</li>
+          <li>Rule scorer (<b>no LLM judge</b>): <b>JSON 0.25 + executable 0.25 + field match 0.40 + numbers must appear in the source 0.10</b>. Caps: unparseable JSON <b>0</b>, off-whitelist op <b>0.15</b>, mismatch plus wrong universe or missing numbers <b>0.35</b>. Custom DSL: <b>14 operators + 9 fields</b>; time-series as-of yesterday. Five mechanical error families calibrate the score gap.</li>
+          <li>Two stages: <b>Stage A</b> extract; admit only if <b>total ≥ 0.7 and no cap</b>. <b>Stage B</b> mutates for up to 4 turns and backtests after-cost IR. Freeze universe / frequency / neutralization.</li>
+          <li>Reproducibility: mutate on the <b>search window</b>, reward on the <b>score window</b>, never touch eval; <b>one-bar lag</b> and <b>cross-section shuffle</b>; per-turn delta reward; the two stages do not leak reward.</li>
+          <li>Post-training is <b>GRPO (rLLM → verl)</b> with <b>vLLM</b> sampling. Checkpoint adoption uses <b>sample diversity, gold vs negative gap, holdout leak check</b>.</li>
         </ul>
       </div>
 ```
 
 ---
 
-## 面试会被追问的地方，先准备好
+## Interview follow-ups
 
-### 1. "为什么要在变形之前加一道真实性检测？"
+### 1. Why a truth check before mutation?
 
-**这一问是简历里刻意不写、留着口头讲的那段。** 现有因子进化 Agent（AlphaAgentEvo 这类）从 Alpha158 这种已验证因子库出发做变形，种子天然是对的；从卖方研报出发，种子是模型读出来的，可能压根不在研报里。
+Existing factor-evolution agents (AlphaAgentEvo and similar) start from a validated library such as Alpha158. Seeds extracted from sell-side notes can be absent from the report.
 
-真正的麻烦在于这种错误不会以"错误"的形式出现：Agent 会老老实实去优化那个不存在的因子，回测是真的、IR 提升是真的、reward 曲线一路向上，**从任何指标上都看不出跑偏**。所以只能在进入变形之前把它拦掉，这就是门禁存在的理由。
+The failure does not look like a failure: the agent will honestly optimize a factor that was never in the note. The backtest is real, IR goes up, the reward curve goes up. You cannot see the miss from metrics. The gate exists to stop that before mutation.
 
-### 2. "为什么不直接用 LLM judge 打分？"
+### 2. Why not an LLM judge?
 
-金标字段是离散枚举（频率 / 中性化）加可解析表达式，规则能判到底。引入 judge 等于多一个需要校准的噪声源，而且 40 条量级喂不出可靠 judge。
+Gold fields are discrete enums plus a parseable expression. A judge is another noise source, and ~40 cases will not calibrate one.
 
-### 3. "40 条 case 会不会太少？"
+### 3. Is 40 cases too few?
 
-**先承认 40 条就是冷启动量级**，不要辩解说够用。然后讲两件由此推出的设计决定：
+Yes, that is a cold-start size. Two design consequences:
 
-- **泄漏检查做成自动门禁**。holdout 只有 10 条，混进去 2 条 holdout 分数就虚高 20%，训练曲线上看不出来。所以不能靠"我记得我分开了"，要写成每次构数据时自动跑的断言，撞了就停。样本越少，单条泄漏的破坏力越大。
-- **不用注入负例充数据**。`inject.py` 能把 40 条一键变成 200 条，数据量看着涨五倍。但那些错是脚本按固定规则改的（窗口永远乘 3），模型学到的是识别这种规律性痕迹，对真实的模型错误不起作用。所以负例只给 verifier 体检，不进训练集。
+- **Leak checks are an automatic gate.** Holdout is small; two leaked rows inflate the score by 20% with no trace on the training curve.
+- **Injected negatives do not pad the train set.** `inject.py` can turn 40 rows into 200, but the model would learn the scripted fingerprint (windows always ×3). Negatives calibrate the verifier only.
 
-**扩量顺序**：先确认 verifier 在这 40 条上能把金标和负例的分拉开（说明打分标准可信），再花人力标更多研报。反过来先标 200 条、后发现 verifier 打分不可信，那 200 条标注工全白费。
+Scale labels only after the verifier separates gold from negatives on these 40.
 
-### 4. "grounding 用数字匹配是不是太粗？"
+### 4. Is number matching too coarse for grounding?
 
-**是粗。** 它抓的是最高频的失败模式：窗口和参数读错、凭空捏造。两个已知漏洞：
+Yes. It catches the common miss: wrong windows/params, invented numbers. Two holes: Chinese numerals such as "二十日" vs `20` (false negative, now normalized); an unrelated `60` in the document (false positive). Next step: require neighborhood words such as "day / lookback / window", not a whole-document hit.
 
-- 研报写"二十日"这种中文数字时，模型正确输出 `20` 反而被判不落地 —— **好样本被冤枉**
-- 研报里恰好有个无关的 `60`（页码、"过去 60 年"），模型编的 `windows=[60]` 巧合命中 —— **坏样本被放过**
+### 5. Credit assignment on long traces?
 
-改进方向：中文数字归一化；要求数字的原文邻域里出现"日 / 回看 / window"这类词，而不是全文档命中即可。
+Reward is decomposable (`Subscores` and per-field hits) and Stage B has a real IR each step. Token-level and step-level credit can be read, not learned. Pivot selection at `max_steps=4` may not be worth a mechanism designed for dozens of steps.
 
-**这一问的重点是态度** —— 说清边界在哪比声称方案完美可信得多。
+### 6. Can the rule scorer detect look-ahead?
 
-### 5. "长轨迹的 credit assignment 怎么处理？"
-
-先说清我们和通用长程 Agentic RL 的差异：**reward 可分解**（verifier 给出 `Subscores` 和逐字段命中，"错在哪个字段"是已知量，不用 value model 估），**且阶段 B 每步有真回测 IR**（"哪一步改坏了"直接可观测，不用采样 reward variance 定位 pivot）。所以 token 级和步级归因都是"读出来"而非"学出来"。
-
-真正需要算法的只有 pivot 选择，而它在 `max_steps=4` 的规模下未必划算 —— 不要给四步轨迹套一套为几十步设计的机制。
-
-如果被追问"那你和 Pivot-RL / SAO 什么关系"：方向一致、代价不同。Pivot-RL 靠展开多条 continuation 算 reward variance 找 pivot，我们每条 continuation 都要真跑回测，所以改用免费的 per-step metric delta 做预筛，只在少数可疑步上展开采样；保留它"组内 advantage 全 0 的状态不产生梯度"这个核心判据。
-
-### 6. "你的规则打分能测出前视偏差吗？"
-
-**不能，现在那套四子分测的是"抄得像不像"。** 表达式和标注一字不差、字段与数字落地双满分，完全可以带着前视：`TS_MEAN($close, 20)` 含当日收盘、当日成交。`DELAY` 在白名单里，打分从来不看。
-
-修法分两层，不靠加一条惩罚项：
-
-- **语言层**：时序算子默认截止昨日，前视写不出来。惩罚挡不住 —— 前视把 IR 抬得太高，RL 会算完账还去做。
-- **回测层**：所有输入统一滞后一天重跑。真因子小幅衰减，有前视的会崩；截面打乱后 IC 应趋近 0，还不趋 0 就是回测框架自己在漏。
-
-另外被追问"阶段 B 不是已经有 val/test 了吗"：那是按**因子**划分，不是按**时间**划分。AlphaAgentEvo 训练和评测回测都硬编码在 2023 同一年，`best_metric` 只看最好的那一个，等于奖励多试几次撞高 IR。我们的修法是搜索期改因子、打分期给分、评测期全程不碰。
+No. The four subscores measure "does it copy the label". `TS_MEAN($close, 20)` can still include today's close. Fix it in the language (ops as-of yesterday) and in the backtest (lag every input one day; shuffle IC to 0). Search/score/eval are **time** splits, not factor splits.

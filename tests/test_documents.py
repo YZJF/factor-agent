@@ -11,7 +11,7 @@ from factor_agent.split import assert_no_leak
 from factor_agent.train.sft_builder import to_sft_row
 
 
-QUOTE = "二十(20)日反转"
+QUOTE = "二十(20)日反转"  # CJK fixture: Chinese-numeral normalization must keep grounding.
 
 
 def _spec(chunk_id: str = "p0-c0000") -> FactorSpec:

@@ -10,7 +10,7 @@ Do not invent fields that are not in the note.
 
 
 def extract_user(report: str) -> str:
-    return f"研报：\n{report}\n\n只输出 FactorSpec JSON。"
+    return f"Report:\n{report}\n\nOutput FactorSpec JSON only."
 
 
 EVOLVE_SYSTEM = """You propose a small mutation of a factor that already passed extraction.

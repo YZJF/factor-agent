@@ -17,7 +17,7 @@ def _case() -> FactorCase:
     )
     return FactorCase(
         case_id="demo",
-        report="中证500 20日反转，行业中性。INDUSTRY_NEUTRALIZE(-TS_PCTCHANGE($close, 20), $industry)",
+        report="CSI500 20-day reversal, industry-neutral. INDUSTRY_NEUTRALIZE(-TS_PCTCHANGE($close, 20), $industry)",
         gold=gold,
     )
 

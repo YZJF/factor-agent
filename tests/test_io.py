@@ -5,7 +5,7 @@ def test_alias_id_spec():
     case = case_from_dict(
         {
             "id": "x",
-            "report": "中证500 20日反转，行业中性。",
+            "report": "CSI500 20-day reversal, industry-neutral.",
             "spec": {
                 "name": "a",
                 "universe": "CSI500",
