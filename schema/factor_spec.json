@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FactorSpec",
+  "type": "object",
+  "required": ["name", "universe", "frequency", "neutralization", "rebalance", "expr"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "minLength": 1 },
+    "universe": { "type": "string", "minLength": 1 },
+    "frequency": { "enum": ["daily", "weekly", "monthly"] },
+    "neutralization": {
+      "enum": ["none", "industry", "size", "industry_size"]
+    },
+    "rebalance": { "enum": ["daily", "weekly", "monthly"] },
+    "expr": { "type": "string", "minLength": 1 },
+    "windows": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 1 }
+    }
+  }
+}

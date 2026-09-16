@@ -1,0 +1,22 @@
+# Two LoRA adapters on one frozen Qwen3-4B. Never stack evolve on extract.
+base_model: Qwen3-4B
+lora:
+  rank: 32
+  alpha: 64
+  target_modules: all-linear
+extract:
+  adapter: extract_lora
+  sft: data/sft/extract_train.jsonl
+  grpo: data/rl/extract_train.jsonl
+  sft_dir: checkpoints/extract_lora/sft
+  grpo_dir: checkpoints/extract_lora/grpo
+  reward: rule verifier
+evolve:
+  adapter: evolve_lora
+  sft: data/sft/evolve_train.jsonl
+  grpo: data/rl/evolve_train.jsonl
+  sft_dir: checkpoints/evolve_lora/sft
+  grpo_dir: checkpoints/evolve_lora/grpo
+  reward: hidden score-window IR delta
+  init_from: base  # not extract_lora
+inference: switch adapter at the extract gate

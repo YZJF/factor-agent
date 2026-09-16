@@ -1,0 +1,17 @@
+# Stage A: faithful extract. Not IC, not LLM judge.
+weights:
+  schema_ok: 0.25
+  executable: 0.25
+  fields: 0.40
+  grounding: 0.10
+caps:
+  invalid_json_cap: 0.0
+  illegal_expr_cap: 0.15
+  invalid_citation_cap: 0.20
+  hallucinated_expr_cap: 0.35
+field_keys:
+  - universe
+  - frequency
+  - neutralization
+  - rebalance
+  - expr

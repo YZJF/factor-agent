@@ -1,0 +1,2 @@
+- name: factor_evolve_agent
+  _target_: factor_agent.train.verl_factor_agent_loop.FactorEvolveAgentLoop

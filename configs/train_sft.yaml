@@ -1,0 +1,10 @@
+# LoRA SFT. STAGE=extract|evolve. MODEL is the frozen base for both adapters.
+stage: extract
+input: data/gold/gold.jsonl
+output: data/sft/extract_train.jsonl
+parquet: data/sft/extract_train.parquet
+split: train
+lora_rank: 32
+lora_alpha: 64
+launch: scripts/run_sft.sh
+notes: evolve SFT is protocol warmup (validate seed, emit same spec). No gold mutation.

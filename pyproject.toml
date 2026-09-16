@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "factor-agent"
+version = "0.1.0"
+description = "Sell-side report factor extraction and gated evolution with rule-based rewards and two-stage LoRA SFT/GRPO"
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2.0"]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+pdf = ["pypdf>=5.0"]
+train = ["pandas>=2.0", "pyarrow>=14.0"]
+backtest = [
+  "baostock>=0.8.9",
+  "fastapi>=0.110",
+  "numpy>=1.24,<2",
+  "pandas>=2.0",
+  "pyqlib>=0.9.7",
+  "uvicorn>=0.29",
+]
+
+[project.scripts]
+factor-agent = "factor_agent.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["factor_agent*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

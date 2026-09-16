@@ -1,0 +1,19 @@
+thresholds:
+  high_reward: 0.80
+  low_reward: 0.30
+  rl_spread_min: 0.30
+  all_high_spread_max: 0.10
+  error_rate_high: 0.50
+
+routes:
+  - quarantine
+  - backtest_gap
+  - sft_format
+  - sft_grounding
+  - sft_tool
+  - sft_curriculum
+  - rl_main
+  - all_high_eval
+  - heldout_eval
+  - long_trajectory
+  - more_probe

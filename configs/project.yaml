@@ -1,0 +1,22 @@
+name: factor-agent
+stages:
+  extract:
+    reward: rule_verifier
+  evolve:
+    reward: backtest_delta_ir
+    gate: extract_reward_min
+    extract_reward_min: 0.7
+    frozen_fields: [universe, frequency, neutralization]
+periods:
+  search: [2018-01-01, 2021-12-31]
+  score: [2022-01-01, 2023-12-31]
+  eval: [2024-01-01, 2024-12-31]
+  mix_search: 0.3
+paths:
+  gold: data/gold/gold.jsonl
+  inject: data/eval_inject/inject.jsonl
+  sft: data/sft/train.jsonl
+  grpo: data/rl/train.jsonl
+  trajectories: data/trajectories
+train:
+  reward_fn: factor_agent.train.verl_reward.compute_score_fn

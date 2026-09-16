@@ -1,0 +1,25 @@
+endpoint: http://localhost:8001/backtest
+metric: Information_Ratio_with_cost
+timeout_seconds: 600
+use_cache: true
+
+data:
+  source: baostock
+  manifest_path: data/market/manifest.json
+  qlib_uri: data/qlib/cn_data
+  warmup_start: 2017-01-01
+  end: 2024-12-31
+  universes: [CSI300, CSI500]
+
+engine:
+  topk_ratio: 0.10
+  open_cost: 0.0005
+  close_cost: 0.0015
+  annualization: 252
+  signal_as_of_bars: 1
+  shuffle_seed: 20260913
+
+windows:
+  search: [2018-01-01, 2021-12-31]
+  score: [2022-01-01, 2023-12-31]
+  eval: [2024-01-01, 2024-12-31]

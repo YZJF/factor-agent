@@ -1,0 +1,13 @@
+# LoRA GRPO. STAGE=extract|evolve. ADAPTER_PATH is that stage's SFT dir.
+stage: extract
+input: data/gold/gold.jsonl
+output: data/rl/extract_train.jsonl
+parquet: data/rl/extract_train.parquet
+split: train
+group_size: 4
+lora_rank: 32
+reward_fn: factor_agent.train.verl_reward.compute_score_fn
+reward_path: factor_agent/train/verl_reward.py
+rollout: vllm
+launch: scripts/run_grpo.sh
+notes: evolve GRPO loads evolve_lora/sft, not extract_lora. inject set is eval only.

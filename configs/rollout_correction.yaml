@@ -1,0 +1,7 @@
+# Enable only for stage-B multi-turn rollouts after response-mask validation.
+enabled: false
+rollout_is: sequence
+rollout_is_threshold: 2.0
+rollout_is_batch_normalize: false
+bypass_mode: false
+enable_mean_abs_logprob_delta: 0.02

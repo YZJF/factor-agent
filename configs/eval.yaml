@@ -1,0 +1,8 @@
+gold: data/gold/gold.jsonl
+inject: data/eval_inject/inject.jsonl
+holdout_split: holdout
+metrics:
+  - mean_reward
+  - parse_ok
+  - field_mean
+  - inject_gap
